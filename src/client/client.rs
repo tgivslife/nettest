@@ -48,15 +48,17 @@ pub struct ClientConfig {
     pub git_hash: Option<String>,
 }
 
-pub async fn client_run(args: Vec<String>, dafault_config: FileConfig) -> anyhow::Result<()> {
+pub async fn client_run(args: Vec<String>, default_config: Option<FileConfig>) -> anyhow::Result<()> {
     info!("Starting measurement client...");
+
+    let default_config = default_config.unwrap_or(FileConfig::default());
 
     if args.contains(&"-h".to_string()) || args.contains(&"--help".to_string()) {
         print_help();
         return Ok(());
     }
 
-    let config = parse_args(args, dafault_config).await?;
+    let config = parse_args(args, default_config).await?;
 
     if !config.raw_output {
         print_test_header();

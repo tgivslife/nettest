@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn StdError + Send + Sync>> {
     let config = config_result.unwrap();
     if args.len() == 1 || args[1] == "-c" {
         args = args.iter().skip(1).map(|s| s.clone()).collect();
-        client::client::client_run(args, config).await?;
+        client::client::client_run(args, Some(config)).await?;
         return Ok(());
     } else if args[1] == "-s" {
         debug!("args: {:?}", args);
