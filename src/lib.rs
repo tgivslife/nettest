@@ -3,6 +3,7 @@
 
 pub mod config;
 pub mod logger;
+#[cfg(not(target_os = "android"))]
 pub mod mioserver;
 pub mod stream;
 pub mod tokio_server;

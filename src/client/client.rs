@@ -1,4 +1,5 @@
 use crate::client::args_parser::{parse_args, print_help};
+#[cfg(not(target_os = "android"))]
 use crate::client::print::graph_service::GraphService;
 use crate::client::print::printer::print_test_header;
 use crate::client::runnner::{run_threads, run_threads_with_progress};
@@ -84,8 +85,11 @@ pub async fn client_run_with_progress(
         run_threads(config.clone(), stats).await
     };
 
+    #[cfg(not(target_os = "android"))]
     if config.graphs {
-        GraphService::print_graph(&state_refs.unwrap());
+        if let Ok(ref states) = state_refs {
+            GraphService::print_graph(states);
+        }
     }
     Ok(())
 }
