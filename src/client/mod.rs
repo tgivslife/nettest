@@ -8,3 +8,4 @@ pub mod state;
 pub mod calculator;
 pub mod args_parser;
 pub mod control_server;
+pub mod progress;

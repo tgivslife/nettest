@@ -1,11 +1,13 @@
 use crate::client::args_parser::{parse_args, print_help};
 use crate::client::print::graph_service::GraphService;
 use crate::client::print::printer::print_test_header;
-use crate::client::runnner::run_threads;
+use crate::client::runnner::{run_threads, run_threads_with_progress};
+use crate::client::progress::MeasurementProgress;
 use crate::config::FileConfig;
 use log::{info, LevelFilter};
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
+use std::sync::mpsc;
 
 pub struct CommandLineArgs {
     pub thread_count: usize,
@@ -49,6 +51,14 @@ pub struct ClientConfig {
 }
 
 pub async fn client_run(args: Vec<String>, default_config: Option<FileConfig>) -> anyhow::Result<()> {
+    client_run_with_progress(args, default_config, None).await
+}
+
+pub async fn client_run_with_progress(
+    args: Vec<String>, 
+    default_config: Option<FileConfig>,
+    progress_sender: Option<mpsc::Sender<MeasurementProgress>>,
+) -> anyhow::Result<()> {
     info!("Starting measurement client...");
 
     let default_config = default_config.unwrap_or(FileConfig::default());
@@ -68,7 +78,11 @@ pub async fn client_run(args: Vec<String>, default_config: Option<FileConfig>) -
 
     info!("Config: {:?}", config);
 
-    let state_refs = run_threads(config.clone(), stats).await;
+    let state_refs = if progress_sender.is_some() {
+        run_threads_with_progress(config.clone(), stats, progress_sender).await
+    } else {
+        run_threads(config.clone(), stats).await
+    };
 
     if config.graphs {
         GraphService::print_graph(&state_refs.unwrap());
